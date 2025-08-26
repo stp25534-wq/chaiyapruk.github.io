@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
-<body>
 
-<canvas id="canvas" width="400" height="400" style="background-color:#333">
-Sorry, your browser does not support canvas.
-</canvas>
+<body onload="starTime()">
+
+  <h1>Chaiyapruk Sinmai</h1>
+<h2>Ton - Np.20</h2>
+<h3>Surathampitak school</h3>
+
+<div id="txt"></div>
 
 <script>
 const canvas = document.getElementById("canvas");
