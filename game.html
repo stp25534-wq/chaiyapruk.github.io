@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมขับรถแข่ง</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: #2c3e50;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 20;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="title">🏁 เกมขับรถแข่ง 🏁</div>
+        
+        <div class="game-ui">
+            <div>คะแนน: <span id="score">0</span></div>
+            <div>ความเร็ว: <span id="speed">0</span> km/h</div>
+            <div>ระยะทาง: <span id="distance">0</span> m</div>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div class="controls">
+            ใช้ ← → หรือ A D เพื่อควบคุมรถ | Space เพื่อเบรก
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>🏁 เกมจบแล้ว!</h2>
+            <p>คะแนนสุดท้าย: <span id="finalScore">0</span></p>
+            <p>ระยะทางที่วิ่งได้: <span id="finalDistance">0</span> เมตร</p>
+            <button class="restart-btn" onclick="restartGame()">เริ่มเกมใหม่</button>
+        </div>
+    </div>
+
+    <script>
+        // ตัวแปรเกม
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ขนาดจริงของ canvas
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // ตัวแปรเกม
+        let game = {
+            score: 0,
+            speed: 0,
+            distance: 0,
+            isGameOver: false,
+            roadOffset: 0,
+            obstacles: [],
+            coins: []
+        };
+
+        // รถผู้เล่น
+        const player = {
+            x: 400,
+            y: 450,
+            width: 40,
+            height: 80,
+            speed: 5,
+            maxSpeed: 8,
+            color: '#FF4444'
+        };
+
+        // ถนน
+        const road = {
+            width: 300,
+            x: 250,
+            lineOffset: 0
+        };
+
+        // อุปสรรค
+        class Obstacle {
+            constructor() {
+                this.width = 40;
+                this.height = 80;
+                this.x = road.x + Math.random() * (road.width - this.width);
+                this.y = -this.height;
+                this.speed = 3 + Math.random() * 2;
+                this.color = '#333333';
+            }
+
+            update() {
+                this.y += this.speed + game.speed * 0.5;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                
+                // เพิ่มรายละเอียดรถ
+                ctx.fillStyle = '#555555';
+                ctx.fillRect(this.x + 5, this.y + 10, this.width - 10, this.height - 20);
+                
+                // ไฟหน้า
+                ctx.fillStyle = '#FFFF88';
+                ctx.fillRect(this.x + 10, this.y + this.height - 15, 8, 6);
+                ctx.fillRect(this.x + this.width - 18, this.y + this.height - 15, 8, 6);
+            }
+
+            isOffScreen() {
+                return this.y > canvas.height;
+            }
+        }
+
+        // เหรียญ
+        class Coin {
+            constructor() {
+                this.width = 20;
+                this.height = 20;
+                this.x = road.x + Math.random() * (road.width - this.width);
+                this.y = -this.height;
+                this.speed = 2;
+                this.rotation = 0;
+            }
+
+            update() {
+                this.y += this.speed + game.speed * 0.3;
+                this.rotation += 0.2;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                ctx.rotate(this.rotation);
+                
+                // เหรียญทอง
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.width/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.width/2 - 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+
+            isOffScreen() {
+                return this.y > canvas.height;
+            }
+        }
+
+        // การควบคุม
+        const keys = {
+            left: false,
+            right: false,
+            brake: false
+        };
+
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'arrowleft':
+                case 'a':
+                    keys.left = true;
+                    e.preventDefault();
+                    break;
+                case 'arrowright':
+                case 'd':
+                    keys.right = true;
+                    e.preventDefault();
+                    break;
+                case ' ':
+                    keys.brake = true;
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.key.toLowerCase()) {
+                case 'arrowleft':
+                case 'a':
+                    keys.left = false;
+                    break;
+                case 'arrowright':
+                case 'd':
+                    keys.right = false;
+                    break;
+                case ' ':
+                    keys.brake = false;
+                    break;
+            }
+        });
+
+        // ฟังก์ชันวาดถนน
+        function drawRoad() {
+            // ถนน
+            ctx.fillStyle = '#333333';
+            ctx.fillRect(road.x, 0, road.width, canvas.height);
+
+            // เส้นขาวกลางถนน
+            ctx.fillStyle = '#FFFFFF';
+            const lineHeight = 40;
+            const lineGap = 20;
+            
+            for (let y = -lineHeight + road.lineOffset; y < canvas.height; y += lineHeight + lineGap) {
+                ctx.fillRect(road.x + road.width/2 - 2, y, 4, lineHeight);
+            }
+            
+            // เส้นขอบถนน
+            ctx.fillStyle = '#FFFF00';
+            ctx.fillRect(road.x - 4, 0, 4, canvas.height);
+            ctx.fillRect(road.x + road.width, 0, 4, canvas.height);
+            
+            // อัพเดตตำแหน่งเส้น
+            road.lineOffset += game.speed + 2;
+            if (road.lineOffset > lineHeight + lineGap) {
+                road.lineOffset = 0;
+            }
+        }
+
+        // ฟังก์ชันวาดรถผู้เล่น
+        function drawPlayer() {
+            // รถผู้เล่น
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+            
+            // รายละเอียดรถ
+            ctx.fillStyle = '#CC2222';
+            ctx.fillRect(player.x - player.width/2 + 5, player.y - player.height/2 + 10, player.width - 10, player.height - 20);
+            
+            // ไฟหน้า
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(player.x - player.width/2 + 8, player.y - player.height/2 + 5, 6, 8);
+            ctx.fillRect(player.x + player.width/2 - 14, player.y - player.height/2 + 5, 6, 8);
+            
+            // ล้อ
+            ctx.fillStyle = '#222222';
+            ctx.fillRect(player.x - player.width/2, player.y - player.height/2 + 15, 8, 12);
+            ctx.fillRect(player.x + player.width/2 - 8, player.y - player.height/2 + 15, 8, 12);
+            ctx.fillRect(player.x - player.width/2, player.y + player.height/2 - 27, 8, 12);
+            ctx.fillRect(player.x + player.width/2 - 8, player.y + player.height/2 - 27, 8, 12);
+        }
+
+        // ฟังก์ชันตรวจสอบการชน
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        // ฟังก์ชันสร้างอุปสรรคและเหรียญ
+        function spawnObjects() {
+            // สร้างอุปสรรค
+            if (Math.random() < 0.02 + game.speed * 0.001) {
+                game.obstacles.push(new Obstacle());
+            }
+            
+            // สร้างเหรียญ
+            if (Math.random() < 0.015) {
+                game.coins.push(new Coin());
+            }
+        }
+
+        // ฟังก์ชันอัพเดตเกม
+        function updateGame() {
+            if (game.isGameOver) return;
+
+            // เพิ่มความเร็วตามเวลา
+            if (game.speed < 8) {
+                game.speed += 0.002;
+            }
+
+            // ควบคุมรถผู้เล่น
+            if (keys.left && player.x > road.x + player.width/2) {
+                player.x -= player.speed;
+            }
+            if (keys.right && player.x < road.x + road.width - player.width/2) {
+                player.x += player.speed;
+            }
+            if (keys.brake && game.speed > 1) {
+                game.speed *= 0.98;
+            }
+
+            // สร้างวัตถุใหม่
+            spawnObjects();
+
+            // อัพเดตอุปสรรค
+            game.obstacles.forEach((obstacle, index) => {
+                obstacle.update();
+                
+                // ตรวจสอบการชน
+                const playerRect = {
+                    x: player.x - player.width/2,
+                    y: player.y - player.height/2,
+                    width: player.width,
+                    height: player.height
+                };
+                
+                if (checkCollision(playerRect, obstacle)) {
+                    gameOver();
+                }
+                
+                // ลบอุปสรรคที่หลุดหน้าจอ
+                if (obstacle.isOffScreen()) {
+                    game.obstacles.splice(index, 1);
+                    game.score += 10;
+                }
+            });
+
+            // อัพเดตเหรียญ
+            game.coins.forEach((coin, index) => {
+                coin.update();
+                
+                // ตรวจสอบการเก็บเหรียญ
+                const playerRect = {
+                    x: player.x - player.width/2,
+                    y: player.y - player.height/2,
+                    width: player.width,
+                    height: player.height
+                };
+                
+                if (checkCollision(playerRect, coin)) {
+                    game.coins.splice(index, 1);
+                    game.score += 50;
+                }
+                
+                // ลบเหรียญที่หลุดหน้าจอ
+                if (coin.isOffScreen()) {
+                    game.coins.splice(index, 1);
+                }
+            });
+
+            // อัพเดตระยะทาง
+            game.distance += game.speed;
+            
+            // อัพเดต UI
+            updateUI();
+        }
+
+        // ฟังก์ชันวาดเกม
+        function drawGame() {
+            // ล้างหน้าจอ
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // วาดพื้นหลัง
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#98FB98');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // วาดถนน
+            drawRoad();
+            
+            // วาดอุปสรรค
+            game.obstacles.forEach(obstacle => obstacle.draw());
+            
+            // วาดเหรียญ
+            game.coins.forEach(coin => coin.draw());
+            
+            // วาดรถผู้เล่น
+            drawPlayer();
+        }
+
+        // ฟังก์ชันอัพเดต UI
+        function updateUI() {
+            document.getElementById('score').textContent = game.score;
+            document.getElementById('speed').textContent = Math.round(game.speed * 20);
+            document.getElementById('distance').textContent = Math.round(game.distance);
+        }
+
+        // ฟังก์ชันจบเกม
+        function gameOver() {
+            game.isGameOver = true;
+            document.getElementById('finalScore').textContent = game.score;
+            document.getElementById('finalDistance').textContent = Math.round(game.distance);
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        // ฟังก์ชันเริ่มเกมใหม่
+        function restartGame() {
+            game = {
+                score: 0,
+                speed: 0,
+                distance: 0,
+                isGameOver: false,
+                roadOffset: 0,
+                obstacles: [],
+                coins: []
+            };
+            
+            player.x = 400;
+            player.y = 450;
+            
+            document.getElementById('gameOver').style.display = 'none';
+            updateUI();
+        }
+
+        // ลูปเกมหลัก
+        function gameLoop() {
+            updateGame();
+            drawGame();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // เริ่มเกม
+        updateUI();
+        gameLoop();
+    </script>
+</body>
+</html>
