@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แนะนำตัว: ชัยพฤกษ์ สินใหม่ (ต้น)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 80%;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #007bff;
+        }
+
+        header h1 {
+            color: #007bff;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #555;
+            font-size: 1.2em;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-top: 30px;
+            gap: 40px;
+        }
+
+        .profile-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #007bff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .bio {
+            flex-grow: 1;
+        }
+
+        .bio h2 {
+            color: #007bff;
+            border-left: 5px solid #007bff;
+            padding-left: 10px;
+        }
+
+        .bio p {
+            text-align: justify;
+        }
+
+        .interest-section {
+            margin-top: 30px;
+        }
+
+        .interest-section h2 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        .interest-list {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .interest-item {
+            background-color: #e9f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1 1 300px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .interest-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .interest-item h3 {
+            color: #0056b3;
+            margin-top: 0;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #888;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                margin: 20px auto;
+                padding: 20px;
+            }
+            .profile-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .interest-list {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ชัยพฤกษ์ สินใหม่</h1>
+        <p>ชื่อเล่น: ต้น</p>
+    </header>
+
+    <div class="profile-section">
+        <img src="https://via.placeholder.com/200" alt="รูปโปรไฟล์ ชัยพฤกษ์ สินใหม่" class="profile-image">
+        <div class="bio">
+            <h2>สวัสดีครับ! ผมต้น ยินดีที่ได้รู้จักครับ</h2>
+            <p>ผมชื่อ <strong>ชัยพฤกษ์ สินใหม่</strong> ชื่อเล่น <strong>ต้น</strong> ปัจจุบันมีความสนใจในเรื่องยานยนต์เป็นอย่างมาก ผมมักจะใช้เวลาว่างในการศึกษาข้อมูลเกี่ยวกับรถยนต์ประเภทต่างๆ ทั้งรถยนต์ไฟฟ้า รถยนต์สันดาป ไปจนถึงรถมอเตอร์ไซค์</p>
+            <p>นอกจากนี้ ผมยังชอบติดตามข่าวสารล่าสุดในอุตสาหกรรมยานยนต์ ไม่ว่าจะเป็นเทคโนโลยีใหม่ๆ การออกแบบ หรือการแข่งขันกีฬามอเตอร์สปอร์ต เพราะผมเชื่อว่าโลกของยานยนต์นั้นไม่เคยหยุดนิ่ง และมีสิ่งใหม่ๆ ให้เรียนรู้เสมอ</p>
+        </div>
+    </div>
+
+    <div class="interest-section">
+        <h2>ความสนใจเกี่ยวกับยานยนต์</h2>
+        <ul class="interest-list">
+            <li class="interest-item">
+                <h3>เทคโนโลยียานยนต์</h3>
+                <p>ผมหลงใหลในเทคโนโลยีที่ขับเคลื่อนโลกยานยนต์ ไม่ว่าจะเป็นระบบขับขี่อัตโนมัติ (Autonomous Driving), แบตเตอรี่สำหรับรถยนต์ไฟฟ้า (EV Battery Technology) หรือระบบส่งกำลัง (Powertrain) ที่ทันสมัย</p>
+            </li>
+            <li class="interest-item">
+                <h3>การออกแบบและประวัติศาสตร์</h3>
+                <p>ผมชอบศึกษาการออกแบบรถยนต์รุ่นต่างๆ ที่มีเอกลักษณ์ รวมถึงประวัติความเป็นมาของแบรนด์รถยนต์ดังๆ ที่สร้างสรรค์นวัตกรรมมาอย่างยาวนาน</p>
+            </li>
+            <li class="interest-item">
+                <h3>มอเตอร์สปอร์ต</h3>
+                <p>การแข่งขันรถยนต์เป็นอีกหนึ่งความสนใจที่ผมติดตามอย่างใกล้ชิด ผมชอบความเร็ว ความท้าทาย และกลยุทธ์ของทีมแข่งในรายการต่างๆ เช่น Formula 1 หรือ MotoGP</p>
+            </li>
+        </ul>
+    </div>
+    
+    <footer>
+        <p>สร้างโดย ชัยพฤกษ์ สินใหม่ (ต้น) &copy; 2025</p>
+    </footer>
+
+</div>
+
+</body>
+</html>
